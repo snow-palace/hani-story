@@ -86,13 +86,14 @@ body::before {
 
 .ch-pill {
   display: inline;
-  padding: 0 4px;
+  padding: 0;
   border-radius: 2px;
   border-bottom: 1px solid #888;
   background: rgba(255,255,255,0.08);
   color: #ddd;
-  font-size: 14px;
-  margin: 0 1px;
+  font-weight: normal;
+  font-size: inherit;
+  margin: 0;
   line-height: inherit;
   vertical-align: baseline;
   white-space: nowrap;
@@ -436,7 +437,7 @@ TIMELINE.forEach(period => {
         const parts = paras.map(p => {
           const { html, keys } = scanText(p.trim());
           keys.forEach(k => rowKeys.add(k));
-          return '<p><span style="display:inline-block;width:2em"></span>' + html + '</p>';
+          return '<p><span style="display:inline-block;width:2ch"></span>' + html + '</p>';
         });
         td.innerHTML = '<div class="ev">' + parts.join('') + '</div>';
       }
