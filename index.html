@@ -33,17 +33,18 @@ body {
   font-family: 'Maple Mono', "Microsoft YaHei","PingFang SC",monospace;
   background-color: #1b1c20;
   color: var(--text);
-  min-height: 100vh; line-height: 1.7; font-size: 13px;
+  min-height: 100vh; line-height: 1.7; font-size: 15px;
 }
-.container {
-  display: flex; max-width: 1480px; margin: 0 auto; min-height: 100vh;
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1;
   background-image:
     linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
     linear-gradient(180deg, #25272e, #1b1c20);
   background-size: 18px 18px, 18px 18px, 100% 100%;
-  background-attachment: fixed;
 }
+.container { display: flex; max-width: 1480px; margin: 0 auto; min-height: 100vh; }
 .main { flex: 1; min-width: 0; padding: 20px 16px 60px; }
 .sidebar {
   width: 190px; flex-shrink: 0; position: sticky; top: 0; height: 100vh;
@@ -90,7 +91,7 @@ body {
   border-bottom: 1px solid #888;
   background: rgba(255,255,255,0.08);
   color: #ddd;
-  font-size: 12px;
+  font-size: 14px;
   margin: 0 1px;
   line-height: inherit;
   vertical-align: baseline;
@@ -401,7 +402,7 @@ function scanText(text) {
    E 块：渲染引擎
    ================================================================ */
 const tbody = document.createElement('tbody');
-const theadHTML = `<thead><tr><th class="th-date">日期</th><th class="th-reality">🏠 现实世界</th><th class="th-park">🏞️ 蜂山公园 (-1层)</th><th class="th-mound">⏳ 斑丘 (-2层)</th></tr></thead>`;
+const theadHTML = `<thead><tr><th class="th-date">日期</th><th class="th-reality">现实世界</th><th class="th-park">蜂山公园 (-1层)</th><th class="th-mound">斑丘 (-2层)</th></tr></thead>`;
 
 let rowIdx = 0;
 const charInRow = [];
