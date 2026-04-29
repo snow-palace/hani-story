@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>不公正的哈尼 · 剧情时间线</title>
+<style>
+:root {
+  --bg: #282a36;
+  --surface: #1e1f29;
+  --border: #44475a;
+  --text: #f8f8f2;
+  --muted: #6272a4;
+  --accent: #ff79c6;
+  --reality-bg: #282a36;
+  --reality-head: #313341;
+  --park-bg: #2c2e39;
+  --park-head: #353745;
+  --mound-bg: #303341;
+  --mound-head: #393b49;
+  --section-head: #44475a;
+  --card-name-bg: #23242f;
+  --card-detail-bg: #181921;
+  --ev-text: #c8ccd4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+@font-face {
+  font-family: 'Maple Mono';
+  src: url('MapleMonoNF-CN.woff2') format('woff2');
+  font-display: swap;
+}
+body {
+  font-family: 'Maple Mono', "Microsoft YaHei","PingFang SC",monospace;
+  background-color: #1b1c20;
+  color: var(--text);
+  min-height: 100vh; line-height: 1.7; font-size: 13px;
+}
+.container {
+  display: flex; max-width: 1480px; margin: 0 auto; min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(180deg, #25272e, #1b1c20);
+  background-size: 18px 18px, 18px 18px, 100% 100%;
+  background-attachment: fixed;
+}
+.main { flex: 1; min-width: 0; padding: 20px 16px 60px; }
+.sidebar {
+  width: 190px; flex-shrink: 0; position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; scrollbar-gutter: stable;
+  padding: 12px; background: var(--surface);
+  border-left: 1px solid var(--border);
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+.tl-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.tl-table th.th-reality, .tl-table td.td-reality,
+.tl-table th.th-park,   .tl-table td.td-park,
+.tl-table th.th-mound,  .tl-table td.td-mound { width: calc((100% - 78px) / 3); }
+.tl-table thead { position: sticky; top: 0; z-index: 10; }
+.tl-table th {
+  padding: 12px 10px; font-size: 12px; font-weight: 700; text-align: center;
+  border-bottom: 2px solid var(--border); letter-spacing: 0.5px;
+}
+.tl-table th.th-reality { background: var(--reality-head); }
+.tl-table th.th-park { background: var(--park-head); }
+.tl-table th.th-mound { background: var(--mound-head); }
+.tl-table th.th-date { background: var(--section-head); width: 78px; min-width: 78px; }
+.tl-table td { padding: 10px 12px; vertical-align: top; border-bottom: 1px solid var(--border); }
+.tl-table td.td-reality { background: var(--reality-bg); }
+.tl-table td.td-park { background: var(--park-bg); }
+.tl-table td.td-mound { background: var(--mound-bg); }
+.tl-table td.td-date {
+  background: var(--surface); width: 78px; text-align: center;
+  font-weight: 600; color: var(--muted); white-space: nowrap; font-size: 12px;
+}
+.section-row td {
+  background: var(--section-head); font-weight: 700; font-size: 14px;
+  text-align: center; padding: 10px; color: var(--text); letter-spacing: 0.5px;
+}
+.td-empty { color: var(--muted); font-style: italic; text-align: center; }
+
+.ch-pill {
+  display: inline;
+  padding: 0 4px;
+  border-radius: 2px;
+  border-bottom: 1px solid #888;
+  background: rgba(255,255,255,0.08);
+  color: #ddd;
+  font-size: 12px;
+  margin: 0 1px;
+  line-height: inherit;
+  vertical-align: baseline;
+  white-space: nowrap;
+  pointer-events: none;
+  position: relative;
+  top: -1px;
+}
+.ch-pill.real {
+  border-bottom-style: dashed;
+}
+
+.ev p {
+  margin: 0 0 0.35em 0;
+  line-height: 1.75;
+  color: var(--ev-text);
+}
+.ev p:last-child { margin-bottom: 0; }
+
+.sidebar-title { font-size: 11px; color: var(--muted); margin-bottom: 12px; text-align: center; }
+.sidebar-empty { color: var(--muted); text-align: center; padding: 40px 10px; font-size: 12px; }
+.char-card { margin-bottom: 14px; cursor: pointer; }
+.char-card-img-wrap {
+  border: 3px solid #888;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+  background-color: #a8a8a8;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0px,
+    rgba(255, 255, 255, 0.25) 1px,
+    transparent 3px,
+    transparent 8px
+  );
+  background-size: auto;
+}
+.char-card-img-wrap img { display: block; width: 100%; height: auto; }
+.char-card-name-block {
+  width: calc(100% - 12px);
+  margin: 0 auto;
+  border: 2px solid #888;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  background: var(--card-name-bg);
+  transition: all 0.2s;
+}
+.char-card-name-basic {
+  padding: 5px 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: #2a2c38;
+}
+.char-card-name-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  border-top: 0px solid var(--border);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.char-card.open .char-card-name-detail {
+  max-height: 200px;
+  border-top-width: 1px;
+}
+.char-card-name-detail-inner { padding: 10px 12px; background: var(--card-detail-bg); border-radius: 0 0 6px 6px; }
+.detail-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.detail-row:last-child { margin-bottom: 0; }
+.detail-row img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
+.detail-row span { font-size: 12px; color: var(--text); }
+.detail-meta {
+  margin-top: 6px; padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted); font-size: 11px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="main">
+<h2 style="font-size:18px;margin-bottom:2px;color:var(--text)">不公正的哈尼 · 剧情时间线</h2>
+<p style="color:var(--muted);font-size:12px;margin:0 0 16px;">横轴=三层世界 &nbsp;|&nbsp; 纵轴=时间推进 &nbsp;|&nbsp; 点击角色名查看详情</p>
+<div class="table-container"><table class="tl-table" id="tl"></table></div>
+</div>
+<div class="sidebar" id="sidebar">
+<div class="sidebar-title">当前可见角色</div>
+<div class="sidebar-empty" id="sb-empty">滚动时间线以查看角色</div>
+<div id="sb-cards"></div>
+</div>
+</div>
+
+<!-- 剧情数据：独立 JS 文件，便于频繁修改文字 -->
+<script src="timeline-story.js"></script>
+
+<script>
+/* ================================================================
+   A 块：常量字典（从 charTable_v6.html 直接粘贴）
+   ================================================================ */
+const Attrs = {
+  METAL:'images/icon/UI_StatCube_iron_color_01.webp', WOOD:'images/icon/UI_StatCube_wood_color_01.webp',
+  WATER:'images/icon/UI_StatCube_water_color_01.webp', FIRE:'images/icon/UI_StatCube_fire_color_01.webp',
+  EARTH:'images/icon/UI_StatCube_earth_color_01.webp', WIND:'images/icon/UI_StatCube_wind_color_01.webp',
+  THUNDER:'images/icon/UI_StatCube_thunder_color_01.webp', ICE:'images/icon/UI_StatCube_ice_color_01.webp',
+  CRYSTAL:'images/icon/UI_StatCube_crystal_color_01.webp', SUN:'images/icon/UI_StatCube_sun_color_01.webp',
+  MOON:'images/icon/UI_StatCube_moon_color_01.webp', DUST:'images/icon/UI_StatCube_dust_color_01.webp',
+  STAR:'images/icon/UI_StatCube_star_color_01.webp', LIGHT:'images/icon/UI_StatCube_light_color_01.webp',
+  WAVE:'images/icon/UI_StatCube_wave_color_01.webp'
+};
+const Schools = {
+  XIWAN:'images/charData/schoolbadges/badge_xiwan.webp', JIANGKOU:'images/charData/schoolbadges/badge_jiangkou.webp',
+  HANI:'images/charData/schoolbadges/badge_hani.webp', LINZHOU:'images/charData/schoolbadges/badge_linzhou.webp',
+  PINGXIAN:'images/charData/schoolbadges/badge_pingxian.webp', JINGU:'images/charData/schoolbadges/badge_jingu.webp',
+  CHONGJIANG:'images/charData/schoolbadges/badge_chongjiang.webp', ZHONGLIAO:'images/charData/schoolbadges/badge_zhongliao.webp',
+  HUAGANG:'images/charData/schoolbadges/badge_huagang.webp'
+};
+const Societies = {
+  FRIEND:'images/charData/soclogos/logo_friend.webp', TOWER:'images/charData/soclogos/logo_tower.webp',
+  BAD:'images/charData/soclogos/logo_bad.webp', FACTORY:'images/charData/soclogos/logo_factory.webp',
+  PLAZA:'images/charData/soclogos/logo_plaza.webp', HANI:'images/charData/soclogos/logo_hani.webp',
+  STARS:'images/charData/soclogos/logo_stars.webp', MAO:'images/charData/soclogos/logo_mao.webp',
+  WHITE:'images/charData/soclogos/logo_white.webp', UNION:'images/charData/soclogos/logo_union.webp',
+  RADIO:'images/charData/soclogos/logo_radio.webp', TUCTUC:'images/charData/soclogos/logo_tuctuc.webp',
+  SODA4:'images/charData/soclogos/logo_soda4.webp', BUKLL:'images/charData/soclogos/logo_bukll.webp'
+};
+const CardImages = {
+  YUMU:'images/charData/cards/card_yumu.webp', ZHOU:'images/charData/cards/card_zhou.webp',
+  COTTON:'images/charData/cards/card_cotton.webp', SONG:'images/charData/cards/card_song.webp',
+  STONE:'images/charData/cards/card_stone.webp', MASTER:'images/charData/cards/card_master.webp',
+  COCO:'images/charData/cards/card_coco.webp', XIAOBEI:'images/charData/cards/card_xiaobei.webp',
+  HEI:'images/charData/cards/card_hei.webp', HUA:'images/charData/cards/card_hua.webp',
+  BAN:'images/charData/cards/card_ban.webp', HONG:'images/charData/cards/card_hong.webp',
+  PIAO:'images/charData/cards/card_piao.webp', CAT:'images/charData/cards/card_cat.webp',
+  DOU:'images/charData/cards/card_dou.webp', SB:'images/charData/cards/card_sb.webp',
+  NAO:'images/charData/cards/card_nao.webp', KID:'images/charData/cards/card_kid.webp',
+  XHANI:'images/charData/cards/card_xhani.webp', NURSE:'images/charData/cards/card_nurse.webp',
+  DREAM:'images/charData/cards/card_dream.webp', CANDY:'images/charData/cards/card_candy.webp',
+  KING:'images/charData/cards/card_king.webp', WAX:'images/charData/cards/card_wax.webp',
+  PIGEON:'images/charData/cards/card_pigeon.webp', PIKA:'images/charData/cards/card_pika.webp',
+  DING:'images/charData/cards/card_ding.webp', BUTA:'images/charData/cards/card_buta.webp',
+  XDQ:'images/charData/cards/card_xdq.webp', penguin:'images/charData/cards/card_penguin.webp',
+  PAO:'images/charData/cards/card_pao.webp', ZHE:'images/charData/cards/card_zhe.webp',
+  TIE:'images/charData/cards/card_tie.webp', BULIAN:'images/charData/cards/card_bulian.webp',
+  PEACH:'images/charData/cards/card_peach.webp', SWEET:'images/charData/cards/card_sweet.webp',
+  KFLOWER:'images/charData/cards/card_kflower.webp', YAN:'images/charData/cards/card_yan.webp',
+  NOBODY:'images/charData/cards/card_nobody.webp', NOHANI:'images/charData/cards/card_nohani.webp'
+};
+
+/* ================================================================
+   B 块：角色数据（属性名与 charTable_v6 完全对齐）
+   ================================================================ */
+const charData = {
+  'yumu':{ name:'于沐川', nickname:'于沐川', real:'于沐川', gender:'女', age:'17',
+    school:'西湾区实验中学', society:'友谊百货', job:'召唤师', color:'#87CEEB',
+    cardImage:CardImages.YUMU, schoolLogo:Schools.XIWAN, societyLogo:Societies.FRIEND,
+    bio:'在友谊百货负责抽卡和卖卡。可能时常在店里看不到我，因为我住得很远。' },
+  'zhou':{ name:'周周', nickname:'周周', real:'-', gender:'女', age:'17',
+    school:'江口铁道第三中学', society:'友谊百货', job:'牧师', color:'#FFC0CB',
+    cardImage:CardImages.ZHOU, schoolLogo:Schools.JIANGKOU, societyLogo:Societies.FRIEND,
+    bio:'在友谊百货负责体力回复。长得超级漂亮，她看起来总是在微笑，但其实是嘴唇的形状很特别。' },
+  'cotton':{ name:'棉发', nickname:'棉发', real:'-', gender:'女', age:'15',
+    school:'哈尼哈尼快乐园中学', society:'友谊百货', job:'厨师', color:'#4169E1',
+    cardImage:CardImages.COTTON, schoolLogo:Schools.HANI, societyLogo:Societies.FRIEND,
+    bio:'在友谊百货负责零食。有点呆头呆脑，常常算不对送餐的人数，每天都会超额准备，每天也都会偷吃。' },
+  'song':{ name:'松松', nickname:'松松', real:'-', gender:'女', age:'15',
+    school:'哈尼哈尼快乐园中学', society:'友谊百货', job:'商人', color:'#FFA500',
+    cardImage:CardImages.SONG, schoolLogo:Schools.HANI, societyLogo:Societies.FRIEND,
+    bio:'在友谊百货负责娱乐。原本会给学生送漫画、电影，后来取消了这个业务，大多时候负责夜班。白天喜欢睡大觉，可总被我抓来替班。' },
+  'stone':{ name:'主席', nickname:'主席', real:'袁君阳', gender:'男', age:'17',
+    school:'江口铁道第三中学', society:'冷凝塔', job:'盾卫', color:'#FFD700',
+    cardImage:CardImages.STONE, schoolLogo:Schools.JIANGKOU, societyLogo:Societies.TOWER,
+    bio:'冷凝塔的创立人，首席。负责保卫塔内不愿战斗的学生们，做事过分认真负责，讲话声音也很大……' },
+  'coco':{ name:'可可', nickname:'可可', real:'徐可', gender:'女', age:'17',
+    school:'西湾区实验中学', society:'冷凝塔', job:'格斗家', color:'#FF4500',
+    cardImage:CardImages.COCO, schoolLogo:Schools.XIWAN, societyLogo:Societies.TOWER,
+    bio:'冷凝塔的战斗员。运动是她的长项，高三之前一直是足球队的。' },
+  'xiaobei':{ name:'小北', nickname:'小北', real:'李小斐', gender:'女', age:'18',
+    school:'平仙市愚桥中学', society:'冷凝塔', job:'刺客', color:'#40E0D0',
+    cardImage:CardImages.XIAOBEI, schoolLogo:Schools.PINGXIAN, societyLogo:Societies.TOWER,
+    bio:'冷凝塔的战斗员。平时留守阵地，也负责管理花园，虽然不怎么爱说话，做事倒是蛮拼的。' },
+  'hei':{ name:'小黑', nickname:'小黑', real:'彭程', gender:'男', age:'18',
+    school:'林州师范大学附属高级中学', society:'不良少年宫', job:'狂战士', color:'#8A2BE2',
+    cardImage:CardImages.HEI, schoolLogo:Schools.LINZHOU, societyLogo:Societies.BAD,
+    bio:'不良少年宫的创立人，第一任首席。现在退下来不做首席了，做事拖拖拉拉，嬉皮笑脸很烦人。' },
+  'bal':{ name:'光头', nickname:'光头', real:'李忠海', gender:'男', age:'17',
+    school:'林州师范大学附属高级中学', society:'不良少年宫', job:'苦行僧', color:'#555',
+    cardImage:CardImages.NOBODY, schoolLogo:Schools.LINZHOU, societyLogo:Societies.BAD, bio:'' },
+  'ban':{ name:'班长', nickname:'班长', real:'阮芳雨', gender:'女', age:'17',
+    school:'金谷市青松中学', society:'不良少年宫', job:'猎人', color:'#32CD32',
+    cardImage:CardImages.BAN, schoolLogo:Schools.JINGU, societyLogo:Societies.BAD,
+    bio:'不良少年宫第三任首席。总的来说是个蛮善良的人，有时候搞不太懂她在想什么，有点爱奉献。' },
+  'piao':{ name:'飘飘', nickname:'飘飘', real:'李菲', gender:'男', age:'18',
+    school:'林州师范大学附属高级中学', society:'炼厂', job:'刺客', color:'#DC143C',
+    cardImage:CardImages.PIAO, schoolLogo:Schools.LINZHOU, societyLogo:Societies.FACTORY,
+    bio:'炼厂的创立人，第一任首席。' },
+  'hua':{ name:'小花', nickname:'小花', real:'刘晓坤', gender:'男', age:'17',
+    school:'金谷市青松中学', society:'炼厂', job:'盗贼', color:'#FF8C00',
+    cardImage:CardImages.HUA, schoolLogo:Schools.JINGU, societyLogo:Societies.FACTORY,
+    bio:'炼厂的战斗员。自来熟，厚脸皮，不知道他吃什么长大的，感觉老师和校霸都拿他没办法。' },
+  'wildcat':{ name:'小野猫', nickname:'小野猫', real:'尹苗苗', gender:'女', age:'18',
+    school:'平仙市愚桥中学', society:'炼厂', job:'剪刀手', color:'linear-gradient(to right, #FFD700, #0000FF)',
+    cardImage:CardImages.CAT, schoolLogo:Schools.PINGXIAN, societyLogo:Societies.FACTORY,
+    bio:'炼厂第二任首席。邋遢，做事很马虎，还很懒，讲话太直接，打架倒是很拿手。' },
+  'dou':{ name:'豆子', nickname:'豆子', real:'杜婉月', gender:'女', age:'17',
+    school:'花港市第十一中学', society:'炼厂', job:'格斗家', color:'#1E90FF',
+    cardImage:CardImages.DOU, schoolLogo:Schools.HUAGANG, societyLogo:Societies.FACTORY,
+    bio:'炼厂第二任首席（现任）。小个子，第一印象很冷漠，不过是个老实孩子，个性蛮坚毅的。' },
+  'sb':{ name:'草莓', nickname:'草莓', real:'-', gender:'女', age:'18',
+    school:'冲江市第五中学', society:'蜂山广场', job:'剪刀手', color:'linear-gradient(to right, #00FF7F, #FF0055)',
+    cardImage:CardImages.SB, schoolLogo:Schools.CHONGJIANG, societyLogo:Societies.PLAZA,
+    bio:'就是你啊。' },
+  'nao':{ name:'闹闹', nickname:'闹闹', real:'顾子欣(18)', gender:'女', age:'17',
+    school:'冲江市第五中学', society:'蜂山广场', job:'剑士', color:'#FFA500',
+    cardImage:CardImages.NAO, schoolLogo:Schools.CHONGJIANG, societyLogo:Societies.PLAZA,
+    bio:'是你的好朋友呀。无拘无束，喜欢折腾，吵吵嚷嚷，开朗得都有点异常了，总能从包里"变"出小零食。' },
+  'kid':{ name:'小孩', nickname:'小孩', real:'顾子欣(15)', gender:'女', age:'15',
+    school:'哈尼哈尼快乐园中学', society:'哈尼哈尼', job:'大魔法师', color:'#FF1493',
+    cardImage:CardImages.KID, schoolLogo:Schools.HANI, societyLogo:Societies.HANI,
+    bio:'哈尼哈尼的创立人，首席。她总有新奇的点子，和她在一起从不会无聊，是个快乐的小疯子。' },
+  'xhani':{ name:'哈尼', nickname:'哈尼', real:'-', gender:'女', age:'15',
+    school:'哈尼哈尼快乐园中学', society:'哈尼哈尼', job:'游侠', color:'#FFFF00',
+    cardImage:CardImages.XHANI, schoolLogo:Schools.HANI, societyLogo:Societies.HANI,
+    bio:'没有名字的普通哈尼。斑丘里多到数不过来，又弱又嚣张，成天叽叽喳喳，上蹿下跳，不知道累一样。' },
+  'sweet':{ name:'甜锈', nickname:'甜锈', real:'-', gender:'女', age:'15',
+    school:'哈尼哈尼快乐园中学', society:'蜂山广播社', job:'刺客', color:'#999',
+    cardImage:CardImages.SWEET, schoolLogo:Schools.HANI, societyLogo:Societies.RADIO, bio:'' },
+  'yan':{ name:'闫佳巧', nickname:'闫佳巧', real:'-', gender:'女', age:'18',
+    school:'林州师范大学附属高级中学', society:'白楼', job:'吟游诗人', color:'#FFFFFF',
+    cardImage:CardImages.YAN, schoolLogo:Schools.LINZHOU, societyLogo:Societies.WHITE,
+    bio:'不知道是谁。个子很小，瘦得像营养不良，别人跟她说话她就像没听见一样，如果你抓到稀有的昆虫，可以送给她。' }
+};
+
+charData['wildcat'].forceWhite = true;
+charData['sb'].forceWhite = true;
+
+/* ================================================================
+   C 块：textColor + ALIAS + scanText
+   ================================================================ */
+function textColor(hex) {
+  if (typeof hex !== 'string' || !hex.startsWith('#')) return '#000';
+  const c = hex.substring(1,7);
+  const r = parseInt(c.substring(0,2), 16);
+  const g = parseInt(c.substring(2,4), 16);
+  const b = parseInt(c.substring(4,6), 16);
+  return (0.299*r + 0.587*g + 0.114*b)/255 > 0.6 ? '#000' : '#fff';
+}
+
+function getPillBg(d) {
+  if (d.color && d.color.startsWith('linear-gradient')) return d.color;
+  return d.color || '#888';
+}
+function getPillColor(d) {
+  if (d.forceWhite) return '#fff';
+  if (d.color && d.color.startsWith('linear-gradient')) {
+    const m = d.color.match(/#[0-9a-fA-F]{6}/);
+    return m ? textColor(m[0]) : '#000';
+  }
+  return textColor(d.color || '#888');
+}
+
+const ALIAS = [
+  ['大于沐川','yumu','real'], ['大飘飘','piao','real'], ['大小黑','hei','real'],
+  ['于沐川','yumu'], ['小孩','kid'], ['闫佳巧','yan'],
+  ['小黑','hei'], ['飘飘','piao'], ['草莓','sb'],
+  ['闹闹','nao'], ['小野猫','wildcat'], ['主席','stone'],
+  ['可可','coco'], ['班长','ban'], ['小北','xiaobei'],
+  ['豆子','dou'], ['小花','hua'], ['光头','bal'],
+  ['棉发','cotton'], ['松松','song'], ['周周','zhou'],
+  ['甜锈','sweet']
+];
+
+function scanText(text) {
+  const parts = [];
+  const keys = new Set();
+  let remaining = text;
+  let pos = 0;
+  while (pos < remaining.length) {
+    let matched = null;
+    for (const [name, key, variant] of ALIAS) {
+      if (remaining.substring(pos).startsWith(name) && (!matched || name.length > matched[0].length)) {
+        matched = [name, key, variant];
+      }
+    }
+    if (matched) {
+      const [name, key, variant] = matched;
+      parts.push(remaining.substring(0, pos));
+      const d = charData[key];
+      if (d) {
+        const bg = getPillBg(d);
+        const cls = variant === 'real' ? 'ch-pill real' : 'ch-pill';
+        parts.push(`<span class="${cls}" data-char="${key}" style="border-bottom-color:${bg}">${name}</span>`);
+        keys.add(key);
+      } else {
+        parts.push(name);
+      }
+      remaining = remaining.substring(pos + name.length);
+      pos = 0;
+    } else {
+      pos++;
+    }
+  }
+  parts.push(remaining);
+  return { html: parts.join(''), keys: Array.from(keys) };
+}
+
+/* ================================================================
+   E 块：渲染引擎
+   ================================================================ */
+const tbody = document.createElement('tbody');
+const theadHTML = `<thead><tr><th class="th-date">日期</th><th class="th-reality">🏠 现实世界</th><th class="th-park">🏞️ 蜂山公园 (-1层)</th><th class="th-mound">⏳ 斑丘 (-2层)</th></tr></thead>`;
+
+let rowIdx = 0;
+const charInRow = [];
+
+TIMELINE.forEach(period => {
+  const sectionRow = document.createElement('tr');
+  sectionRow.className = 'section-row';
+  sectionRow.innerHTML = `<td colspan="4">${period.period}</td>`;
+  tbody.appendChild(sectionRow);
+
+  period.events.forEach(ev => {
+    const tr = document.createElement('tr');
+    tr.setAttribute('id', 'r' + rowIdx);
+
+    const dateCell = document.createElement('td');
+    dateCell.className = 'td-date';
+    dateCell.innerHTML = ev.date;
+    tr.appendChild(dateCell);
+
+    const rowKeys = new Set();
+
+    ['reality','park','mound'].forEach(col => {
+      const td = document.createElement('td');
+      td.className = col === 'reality' ? 'td-reality' : col === 'park' ? 'td-park' : 'td-mound';
+      const text = ev[col];
+      if (!text || text.trim() === '') {
+        td.className += ' td-empty';
+        td.textContent = '—';
+      } else {
+        const paras = text.split('\n\n').filter(p => p.trim());
+        const parts = paras.map(p => {
+          const { html, keys } = scanText(p.trim());
+          keys.forEach(k => rowKeys.add(k));
+          return '<p><span style="display:inline-block;width:2em"></span>' + html + '</p>';
+        });
+        td.innerHTML = '<div class="ev">' + parts.join('') + '</div>';
+      }
+      tr.appendChild(td);
+    });
+
+    tr.setAttribute('data-chars', Array.from(rowKeys).join(','));
+    charInRow[rowIdx] = rowKeys;
+    tbody.appendChild(tr);
+    rowIdx++;
+  });
+});
+
+const tl = document.getElementById('tl');
+tl.innerHTML = theadHTML;
+tl.appendChild(tbody);
+
+/* ================================================================
+   F 块：IntersectionObserver（侧栏动态显示）
+   ================================================================ */
+const sbCards = document.getElementById('sb-cards');
+const sbEmpty = document.getElementById('sb-empty');
+const visibleChars = new Map();
+
+function updateSidebar() {
+  sbCards.innerHTML = '';
+  if (visibleChars.size === 0) {
+    sbEmpty.style.display = 'block';
+    return;
+  }
+  sbEmpty.style.display = 'none';
+  visibleChars.forEach((count, key) => {
+    const d = charData[key];
+    if (!d || !d.cardImage || d.cardImage === CardImages.NOBODY || d.cardImage === CardImages.NOHANI) return;
+    const card = document.createElement('div');
+    card.className = 'char-card';
+    card.setAttribute('data-char', key);
+    const border = getPillBg(d);
+    card.innerHTML = `<div class="char-card-img-wrap" style="border-color:${border}">
+      <img src="${d.cardImage}" alt="${d.nickname}" loading="lazy">
+    </div>
+    <div class="char-card-name-block" style="border-color:${border}">
+      <div class="char-card-name-basic">${d.nickname}</div>
+      <div class="char-card-name-detail">
+        <div class="char-card-name-detail-inner">
+          <div class="detail-row">${d.societyLogo?`<img src="${d.societyLogo}" alt="">`:''}<span>${d.society||'—'}</span></div>
+          <div class="detail-row">${d.schoolLogo?`<img src="${d.schoolLogo}" alt="">`:''}<span>${d.school||'—'}</span></div>
+          <div class="detail-meta">本名：${d.real||'—'}　${d.gender}　${d.age}岁</div>
+        </div>
+      </div></div>`;
+    card.onclick = function() { toggleCard(card); };
+    sbCards.appendChild(card);
+  });
+}
+
+function toggleCard(card) {
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.char-card.open').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    const idx = parseInt(entry.target.getAttribute('id').substring(1));
+    const keys = charInRow[idx];
+    if (!keys) return;
+    if (entry.isIntersecting) {
+      keys.forEach(k => visibleChars.set(k, (visibleChars.get(k) || 0) + 1));
+    } else {
+      keys.forEach(k => {
+        const c = visibleChars.get(k);
+        if (c === 1) visibleChars.delete(k);
+        else if (c > 1) visibleChars.set(k, c - 1);
+      });
+    }
+    updateSidebar();
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.tl-table tbody tr[id]').forEach(tr => observer.observe(tr));
+
+/* ================================================================
+   G 块：pill点击联动侧栏
+   ================================================================ */
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('ch-pill')) {
+    const key = e.target.getAttribute('data-char');
+    if (!key) return;
+    const card = document.querySelector(`.char-card[data-char="${key}"]`);
+    if (card) {
+      document.querySelectorAll('.char-card.open').forEach(c => c.classList.remove('open'));
+      card.classList.add('open');
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+});
+</script>
+</body>
+</html>
